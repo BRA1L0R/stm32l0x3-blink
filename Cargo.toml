@@ -1,0 +1,19 @@
+[package]
+name = "stm32-blink"
+version = "0.1.0"
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+panic-halt = "0.2.0"
+cortex-m = "^0.6.3"      # Access to the generic ARM peripherals
+cortex-m-rt = "^0.6.12"  # Startup code for the ARM Core
+
+[dependencies.stm32l0]
+version = "0.14.0"
+features = ["stm32l0x3", "rt"]
+
+[profile.release]
+opt-level = 'z' # turn on maximum optimizations. We only have 64kB
+lto = true      # Link-time-optimizations for further size reduction
