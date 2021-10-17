@@ -6,16 +6,25 @@ use stm32l0::stm32l0x3;
 
 use panic_halt as _;
 
+fn enable_hsi(per: &stm32l0x3::Peripherals) {
+    // enable hsi16
+    per.RCC.cr.modify(|_, w| w.hsi16on().enabled());
+    while per.RCC.cr.read().hsi16rdyf().is_not_ready() {}
+
+    // set system clock to hsi16
+    per.RCC.cfgr.write(|w| w.sw().hsi16());
+}
+
 static mut MILLIS: u32 = 0;
 
 fn run() -> ! {
     let per = stm32l0x3::Peripherals::take().unwrap();
 
-    per.RCC.cfgr.write(|w| w.sw().hsi16());
+    enable_hsi(&per);
 
     per.STK
         .rvr
-        .write(|w| unsafe { w.reload().bits((16000000 / 1000 / 8) as u32 - 1) });
+        .write(|w| unsafe { w.reload().bits((16000000 / 1000) as u32 - 1) });
     per.STK.cvr.write(|w| unsafe { w.current().bits(0) });
     per.STK.csr.write(|w| {
         w.tickint()
